@@ -30,8 +30,6 @@ public class Block {
         this.sid = Integer.parseInt(BlockElement.getAttribute("SID"));
         this.numInputPorts = 1;
         this.numOutputPorts = 1;
-        
-        System.out.println("Block Name: " + this.name + ", Type: " + this.type + ", SID: " + this.sid);
 
         NodeList SubBlockList = BlockElement.getElementsByTagName("P");
         for (int j = 0; j < SubBlockList.getLength(); j++) {
