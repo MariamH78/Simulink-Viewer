@@ -1,4 +1,3 @@
-
 package simulink;
 
 import java.io.StringReader;
@@ -44,10 +43,10 @@ public class simple_simulink {
             String inputFileName = in.nextLine();
             String MDL_FileText = Files.readString(Paths.get(inputFileName));
 
-            Pattern XML_Pattern = Pattern.compile("(?s)(?<=__MWOPC_PART_BEGIN__ /simulink/systems/system_root\\.xml\\s).*?(?=__MWOPC_PART_BEGIN__)(?-s)");
+            Pattern XML_Pattern = Pattern.compile("(?s)(?<=__MWOPC_PART_BEGIN__ /simulink/systems/system_root\\.xml).*?(?=__MWOPC_PART_BEGIN__)(?-s)");
             Matcher regexMatcher = XML_Pattern.matcher(MDL_FileText);
             regexMatcher.find();
-            String matchedXML = regexMatcher.group();
+            String matchedXML = regexMatcher.group().trim();
 
             InputSource is = new InputSource(new StringReader(matchedXML));
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -62,32 +61,16 @@ public class simple_simulink {
                 if (BlockNode.getNodeType() == Node.ELEMENT_NODE) {
                     Element BlockElement = (Element) BlockNode;
                     blocks.add(new Block(BlockElement));
-                    }
+                }
             }
 
             for (int i = 0; i < blocks.size(); i++) {
-            	Block ex = blocks.get(i);
-            	ex.print();
+                Block ex = blocks.get(i);
+                ex.print();
             }
 
-        } catch (EmptyAutosarFileException e) {
-            System.err.println("Error: " + e.getMessage());
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e);
         }
-    }
-}
-
-@SuppressWarnings("serial")
-class NotVaildAutosarFileException extends Exception {
-    public NotVaildAutosarFileException(String message) {
-        super(message);
-    }
-}
-
-@SuppressWarnings("serial")
-class EmptyAutosarFileException extends RuntimeException {
-    public EmptyAutosarFileException(String message) {
-        super(message);
     }
 }

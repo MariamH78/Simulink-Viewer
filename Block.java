@@ -1,33 +1,37 @@
 package simulink;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import javafx.geometry.Point2D;
 
 public class Block {
+    private static HashMap <Integer, Block> blockList = new HashMap<>();
+
     private String name;
     private String type;
-    private String sid;
-    private List<Integer> ports;
+    private int sid;
     private List<Integer> position;
-    private int zOrder;
-    private String iconShape;
     private String inputs;
-    private String scopeSpecificationString;
     private int numInputPorts;
-    private String floating;
-    private String blockMirror;
-    private int sampleTime;
-    private String hasFrameUpgradeWarning;
+    private int numOutputPorts;
+    private boolean blockMirror;
+    
+    private ArrayList <Point2D> inPorts;
+    private ArrayList <Point2D> outPorts;
 
     public Block(Element BlockElement ) {
     	this.name = BlockElement.getAttribute("Name");
-		this.type = BlockElement.getAttribute("BlockType");
-		this.sid = BlockElement.getAttribute("SID");
-		System.out.println("Block Name: " + this.name + ", Type: " + this.type + ", SID: " + this.sid);
+        this.type = BlockElement.getAttribute("BlockType");
+        this.sid = Integer.parseInt(BlockElement.getAttribute("SID"));
+        this.numInputPorts = 1;
+        this.numOutputPorts = 1;
+        
+        System.out.println("Block Name: " + this.name + ", Type: " + this.type + ", SID: " + this.sid);
 
         NodeList SubBlockList = BlockElement.getElementsByTagName("P");
         for (int j = 0; j < SubBlockList.getLength(); j++) {
@@ -38,128 +42,95 @@ public class Block {
                 String SubBlockName = SubBlockElement.getAttribute("Name");
                 String SubBlockValue = SubBlockElement.getTextContent();
                 switch (SubBlockName) {
-                	case "Ports":
-                		String[] portStrings = SubBlockValue.substring(1, SubBlockValue.length() - 1).split(",");
-                	    List<Integer> portList = new ArrayList<>();
-                	    for (String portString : portStrings) {
-                	        int port = Integer.parseInt(portString.trim());
-                	        portList.add(port);
-                	    }
-                	    this.ports = portList;
-                		break;
-                	case "Position":
-                		String[] positionStrings = SubBlockValue.substring(1, SubBlockValue.length() - 1).split(",");
-                	    List<Integer> positionList = new ArrayList<>();
-                	    for (String positionString : positionStrings) {
-                	        int position = Integer.parseInt(positionString.trim());
-                	        positionList.add(position);
-                	    }
-                	    this.position = positionList;
-                		break;
-                	case "ZOrder":
-                	    this.zOrder = Integer.parseInt(SubBlockValue.trim());
-                	    break;
-                	case "IconShape":
-                	    this.iconShape = SubBlockValue.trim();
-                	    break;
-                	case "Inputs":
-                	    this.inputs = SubBlockValue.trim();
-                	    break;
-                	case "ScopeSpecificationString":
-                	    this.scopeSpecificationString = SubBlockValue.trim();
-                	    break;
-                	case "NumInputPorts":
-                	    this.numInputPorts = Integer.parseInt(SubBlockValue.trim());
-                	    break;
-                	case "Floating":
-                	    this.floating = SubBlockValue.trim();
-                	    break;
-                	case "BlockMirror":
-                	    this.blockMirror = SubBlockValue.trim();
-                	    break;
-                	case "SampleTime":
-                	    this.sampleTime = Integer.parseInt(SubBlockValue.trim());
-                	    break;
-                	case "HasFrameUpgradeWarning":
-                	    this.hasFrameUpgradeWarning = SubBlockValue.trim();
-                	    break;
+                    case "Ports":
+                        String[] portStrings = SubBlockValue.substring(1, SubBlockValue.length() - 1).split(",");
+                        List<Integer> portList = new ArrayList<>();
+                        for (String portString : portStrings) {
+                            int port = Integer.parseInt(portString.trim());
+                            portList.add(port);
+                        }
+                        if (portList.size() >= 2){
+                            this.numInputPorts = portList.get(0);
+                            this.numOutputPorts = portList.get(1);
+                        } else {
+                            this.numOutputPorts = portList.get(0);
+                        }
+                        break;
+                    case "Position":
+                            String[] positionStrings = SubBlockValue.substring(1, SubBlockValue.length() - 1).split(",");
+                        List<Integer> positionList = new ArrayList<>();
+                        for (String positionString : positionStrings) {
+                            int position = Integer.parseInt(positionString.trim());
+                            positionList.add(position);
+                        }
+                        this.position = positionList;
+                            break;
+                    case "Inputs":
+                        this.inputs = SubBlockValue.trim();
+                        break;
+                    case "NumInputPorts":
+                        this.numInputPorts = Integer.parseInt(SubBlockValue.trim());
+                        break;
+                    case "BlockMirror":
+                        this.blockMirror = Boolean.parseBoolean(SubBlockValue.trim());
+                        break;
                 }
             }
         }
+        Block.blockList.put(this.sid, this);
+        this.inPorts = new ArrayList<>();
+        this.outPorts = new ArrayList<>();
+        if (this.blockMirror){
+            for (int i = 0; i < this.numInputPorts; i++)
+                this.inPorts.add(new Point2D((double)(i * (this.position.get(3) - this.position.get(1) - 5) / this.numInputPorts + 5), (double)(this.position.get(3))));
+            for (int i = 0; i < this.numOutputPorts; i++)
+                this.outPorts.add(new Point2D((double)(i * (this.position.get(3) - this.position.get(1) - 5) / this.numInputPorts + 5), (double)(this.position.get(0))));    
+        } 
+        else {
+            for (int i = 0; i < this.numInputPorts; i++)
+                this.inPorts.add(new Point2D((double)(i * (this.position.get(3) - this.position.get(1) - 5) / this.numInputPorts + 5), (double)(this.position.get(0))));
+            for (int i = 0; i < this.numOutputPorts; i++)
+                this.outPorts.add(new Point2D((double)(i * (this.position.get(3) - this.position.get(1) - 5) / this.numInputPorts + 5), (double)(this.position.get(3))));    
+        } 
     }
 
-	public void plot() {
-    	System.out.println("Plotting...");
+    public void plot() {
+        System.out.println("Plotting...");
     }
 
-	public void print() {
-		System.out.println("Block Name: " + this.name + ", Type: " + this.type + ", SID: " + this.sid);
-		System.out.println("  Property Name: Ports" + ", Value: " + this.ports);
-		System.out.println("  Property Name: position" + ", Value: " + this.position);
-		System.out.println("  Property Name: zOrder" + ", Value: " + this.zOrder);
-		System.out.println("  Property Name: iconShape" + ", Value: " + this.iconShape);
-		System.out.println("  Property Name: inputs" + ", Value: " + this.inputs);
-		System.out.println("  Property Name: scopeSpecificationString" + ", Value: " + this.scopeSpecificationString);
-		System.out.println("  Property Name: numInputPorts" + ", Value: " + this.numInputPorts);
-		System.out.println("  Property Name: blockMirror" + ", Value: " + this.blockMirror);
-		System.out.println("  Property Name: sampleTime" + ", Value: " + this.sampleTime);
-		System.out.println("  Property Name: hasFrameUpgradeWarning" + ", Value: " + this.hasFrameUpgradeWarning);
-		System.out.println("  Property Name: floating" + ", Value: " + this.floating);
-	}
+    public void print() {
+        System.out.println("Block Name: " + this.name + ", Type: " + this.type + ", SID: " + this.sid);
+        System.out.println("  Property Name: position" + ", Value: " + this.position);
+        System.out.println("  Property Name: inputs" + ", Value: " + this.inputs);
+        System.out.println("  Property Name: numInputPorts" + ", Value: " + this.numInputPorts);
+        System.out.println("  Property Name: blockMirror" + ", Value: " + this.blockMirror);
+    }
 
-	public List<Integer> getPorts() {
-	    return ports;
-	}
+    public List<Integer> getPosition() {
+        return position;
+    }
 
-	public List<Integer> getPosition() {
-	    return position;
-	}
+    public String getInputs() {
+        return inputs;
+    }
 
-	public int getZOrder() {
-	    return zOrder;
-	}
+    public boolean getBlockMirror() {
+        return blockMirror;
+    }
 
-	public String getIconShape() {
-	    return iconShape;
-	}
+    public int getNumInputPorts() {
+        return numInputPorts;
+    }
 
-	public String getInputs() {
-	    return inputs;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public String getBlockMirror() {
-	    return blockMirror;
-	}
+    public String getType() {
+        return type;
+    }
 
-	public int getSampleTime() {
-	    return sampleTime;
-	}
-	
-	public String getHasFrameUpgradeWarning() {
-	    return hasFrameUpgradeWarning;
-	}
-	
-	public String getScopeSpecificationString() {
-	    return scopeSpecificationString;
-	}
-	
-	public int getNumInputPorts() {
-	    return numInputPorts;
-	}
-	
-	public String getFloating() {
-	    return floating;
-	}
-	
-	public String getName() {
-	    return name;
-	}
-	
-	public String getType() {
-	    return type;
-	}
-	
-	public String getSid() {
-	    return sid;
-	}
+    public int getSid() {
+        return sid;
+    }
 }
