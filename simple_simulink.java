@@ -19,73 +19,103 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import javafx.application.Application;
+import static javafx.application.Application.launch;
+import javafx.geometry.Point2D;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
+import javafx.scene.shape.Line;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 
 //extends Application
 public class simple_simulink  extends Application {
- public static void main(String[] args) {
-     launch(args);
- }
+    public static void main(String[] args) {
+        launch(args);
+    }
 
- @Override
- public void start(Stage primaryStage) throws Exception {
-     primaryStage.setTitle("Rectangles");
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        primaryStage.setTitle("Rectangles");
 
-     try (Scanner in = new Scanner(System.in)) {
+        try (Scanner in = new Scanner(System.in)) {
 
-         String inputFileName = in.nextLine();
-         String MDL_FileText = Files.readString(Paths.get(inputFileName));
+            String inputFileName = in.nextLine();
+            String MDL_FileText = Files.readString(Paths.get(inputFileName));
 
-         Pattern XML_Pattern = Pattern.compile("(?s)(?<=__MWOPC_PART_BEGIN__ /simulink/systems/system_root\\.xml).*?(?=__MWOPC_PART_BEGIN__)(?-s)");
-         Matcher regexMatcher = XML_Pattern.matcher(MDL_FileText);
-         regexMatcher.find();
-         String matchedXML = regexMatcher.group().trim();
+            Pattern XML_Pattern = Pattern.compile("(?s)(?<=__MWOPC_PART_BEGIN__ /simulink/systems/system_root\\.xml).*?(?=__MWOPC_PART_BEGIN__)(?-s)");
+            Matcher regexMatcher = XML_Pattern.matcher(MDL_FileText);
+            regexMatcher.find();
+            String matchedXML = regexMatcher.group().trim();
 
-         InputSource is = new InputSource(new StringReader(matchedXML));
-         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-         Document doc = dBuilder.parse(is);
+            InputSource is = new InputSource(new StringReader(matchedXML));
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(is);
 
-         NodeList BlockList = doc.getElementsByTagName("Block");
-         List<Block> blocks = new ArrayList<Block>();
-         
-         for (int i = 0; i < BlockList.getLength(); i++) {
-             Node BlockNode = BlockList.item(i);
-             if (BlockNode.getNodeType() == Node.ELEMENT_NODE) {
-                 Element BlockElement = (Element) BlockNode;
-                 blocks.add(new Block(BlockElement));
-                 }
-         }
+            NodeList BlockList = doc.getElementsByTagName("Block");
+            List<Block> blocks = new ArrayList<Block>();
 
-         Pane root = new Pane();
-         for (int i = 0; i < blocks.size(); i++) {
-        	 blocks.get(i).print();
-        	 int x = blocks.get(i).getPosition().get(0);
-        	 int y = blocks.get(i).getPosition().get(1);
-             int width = blocks.get(i).getPosition().get(3) - x;
-             int higth = blocks.get(i).getPosition().get(4) - y;
-        	 Rectangle rectangle = new Rectangle(x, y, width, higth);
+            for (int i = 0; i < BlockList.getLength(); i++) {
+                Node BlockNode = BlockList.item(i);
+                if (BlockNode.getNodeType() == Node.ELEMENT_NODE) {
+                    Element BlockElement = (Element) BlockNode;
+                    blocks.add(new Block(BlockElement));
+                    }
+            }
 
-             root.getChildren().add(rectangle);
+            NodeList lineList = doc.getElementsByTagName("Line");
+            List<LineList> lines = new ArrayList<LineList>();
 
-             Text textNode = new Text(blocks.get(i).getName());
-             textNode.setFont(new Font("Arial", 12));
-             textNode.setX(x + width/2);
-             textNode.setY(y + higth/2);
-             root.getChildren().add(textNode);
-         }
+            for (int i = 0; i < lineList.getLength(); i++) {
+                Node lineListNode = lineList.item(i);
+                if (lineListNode.getNodeType() == Node.ELEMENT_NODE) {
+                    Element lineListElement = (Element) lineListNode;
+                    lines.add(new LineList(lineListElement));
+                }
+            }
+            
+            Pane root = new Pane();
+            for (int i = 0; i < blocks.size(); i++) {
+                blocks.get(i).print();
+                int x = blocks.get(i).getPosition().get(0);
+                int y = blocks.get(i).getPosition().get(1);
+                int width = blocks.get(i).getPosition().get(3) - x;
+                int higth = blocks.get(i).getPosition().get(4) - y;
+                Rectangle rectangle = new Rectangle(x, y, width, higth);
+                
+                root.getChildren().add(rectangle);
 
-         Scene scene = new Scene(root, 800, 600);
-         primaryStage.setScene(scene);
-         primaryStage.show();
+                Text textNode = new Text(blocks.get(i).getName());
+                textNode.setFont(new Font("Arial", 12));
+                textNode.setX(x + width/2);
+                textNode.setY(y + higth/2);
+                root.getChildren().add(textNode);
+            }
+            
+            for (int i = 0; i < lines.size(); i++) {
+                ArrayList<Pair<Point2D, Point2D>> currentList = lines.get(i).getLineList();
+                for (int j = 0; j < currentList.size(); j++){
+                    int x1 = (int) currentList.get(j).getKey().getX();
+                    int y1 = (int) currentList.get(j).getKey().getY();
+                    int x2 = (int) currentList.get(j).getValue().getX();
+                    int y2 = (int) currentList.get(j).getValue().getY();
+                
+                    Line line = new Line(x1, y1, x2, y2);
+                
+                    root.getChildren().add(line);
 
-     } catch (Exception e) {
-         System.err.println(e);
-     } 
- }
+                }
+            }
+
+            Scene scene = new Scene(root, 800, 600);
+            primaryStage.setScene(scene);
+            primaryStage.show();
+
+        } catch (Exception e) {
+            System.err.println(e);
+        } 
+    }
 }

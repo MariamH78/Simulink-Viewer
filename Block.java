@@ -131,4 +131,14 @@ public class Block {
     public int getSid() {
         return sid;
     }
+    
+    public static HashMap<Integer, Block> getBlockList() {
+        return blockList;
+    }
+    public ArrayList<Point2D> getOutPorts(){
+        return this.outPorts;
+    }
+    public ArrayList<Point2D> getInPorts(){
+        return this.inPorts;
+    }
 }
