@@ -18,7 +18,7 @@ public class LineList {
         ArrayList<Point2D> pointList = getLines(lineElement);
         for (int i = 1; i < pointList.size(); i++)
             this.lineList.add(new Pair(pointList.get(i - 1), pointList.get(i)));
-        
+
         ArrayList<Pair<Point2D, Point2D>> branchList = getBranches(lineElement, pointList.get(pointList.size() - 1));
         if (branchList != null)
             this.lineList.addAll(branchList);
@@ -26,28 +26,26 @@ public class LineList {
     
     private ArrayList<Pair<Point2D, Point2D>> getBranches(Element lineElement, Point2D starting_pt){
         NodeList branchList = lineElement.getElementsByTagName("Branch");
-         for (int j = 0; j < branchList.getLength(); j++) {
+        for (int j = 0; j < branchList.getLength(); j++) {
             Node branchNode = branchList.item(j);
+            
             if (branchNode.getNodeType() == Node.ELEMENT_NODE) {
+                this.starting_pt = starting_pt;
                 ArrayList <Point2D> branchPts = getLines((Element) branchNode);
                 if (branchPts != null){
                     Point2D pt1;
                     Point2D pt2;
-                    branchPts.add(0, starting_pt);
-                    for (int i = 1; i < branchPts.size() - 1; i++){
+                    //branchPts.add(0, starting_pt);
+                    for (int i = 1; i < branchPts.size(); i++){
                         pt1 = branchPts.get(i-1);
                         pt2 = branchPts.get(i);
-                        System.out.println(new Pair(pt1, pt2));
                         lineList.add(new Pair(pt1, pt2));
                     }
-                    pt1 = branchPts.get(branchPts.size() - 2);
-                    pt2 = branchPts.get(branchPts.size() - 1);
-                    lineList.add(new Pair(pt1, pt2));
                 }
+                this.ending_pt = null;
                
-            } System.out.println();
+            } 
         }
-         System.out.println();
         return lineList;
     }
     
@@ -55,16 +53,15 @@ public class LineList {
         ArrayList<Point2D> pointList = new ArrayList<>();
     
         NodeList propertyList = lineElement.getElementsByTagName("P");
+        
         for (int j = 0; j < propertyList.getLength(); j++) {
-                                    
             Node SubBlockNode = propertyList.item(j);
-            if (SubBlockNode.getNodeType() == Node.ELEMENT_NODE) {
+            if (SubBlockNode.getNodeType() == Node.ELEMENT_NODE && SubBlockNode.getParentNode().isSameNode(lineElement)) {
                 Element SubBlockElement = (Element) SubBlockNode;
 
                 String propertyName = SubBlockElement.getAttribute("Name");
                 String propertyValue = SubBlockElement.getTextContent();
                 int port_no;
-
                 switch(propertyName){
                     case "Src":
                         String srcStringParts[] = propertyValue.split("#");
@@ -93,7 +90,7 @@ public class LineList {
                     case "Points":
                         String[] pointStrings = propertyValue.substring(1, propertyValue.length() - 1).split(";|$");
                         
-                            ArrayList<Double> pointInts = new ArrayList<>();
+                        ArrayList<Double> pointInts = new ArrayList<>();
                         for (String point : pointStrings){
                             String[] pointString = point.split(",");
                             for (String i : pointString) {
@@ -101,25 +98,24 @@ public class LineList {
                                pointInts.add(coord);
                             }
                         }
-                            for (int i = 1; i < 3; i+=2){
-                                pointInts.set(i, starting_pt.getX() + pointInts.get(i));
-                                pointInts.set(i - 1, starting_pt.getY() + pointInts.get(i - 1));
-                                pointList.add(new Point2D(pointInts.get(i), pointInts.get(i - 1)));
-                            }
-                            for (int i = 3; i < pointInts.size(); i+=2){
-                                pointInts.set(i, pointInts.get(i) + pointInts.get(i - 2));
-                                pointInts.set(i - 1, pointInts.get(i - 1) + pointInts.get(i - 3));
-                                pointList.add(new Point2D(pointInts.get(i), pointInts.get(i - 1)));
-                            }
+                        
+                        for (int i = 1; i < 3; i+=2){
+                            pointInts.set(i, starting_pt.getY() + pointInts.get(i));
+                            pointInts.set(i - 1, starting_pt.getX() + pointInts.get(i - 1));
+                            pointList.add(new Point2D(pointInts.get(i - 1), pointInts.get(i)));
+                        }
+                        for (int i = 3; i < pointInts.size(); i+=2){
+                            pointInts.set(i, pointInts.get(i) + pointInts.get(i - 2));
+                            pointInts.set(i - 1, pointInts.get(i - 1) + pointInts.get(i - 3));
+                            pointList.add(new Point2D(pointInts.get(i - 1), pointInts.get(i)));
+                        }
                         break;
                 }    
             }
         }
-        
         if (starting_pt != null)
             pointList.add(0, starting_pt);
-        else
-            pointList.get(0);
+        
         if (ending_pt != null)
             pointList.add(ending_pt);
 

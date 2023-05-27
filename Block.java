@@ -82,14 +82,14 @@ public class Block {
         this.outPorts = new ArrayList<>();
         if (this.blockMirror){
             for (int i = 1; i <= this.numInputPorts; i++)
-                this.inPorts.add(new Point2D(this.position.get(2), this.position.get(1) +  i * (this.position.get(3) - this.position.get(1) - 10) / this.numInputPorts + 5));
+                this.inPorts.add(new Point2D(this.position.get(2), this.position.get(1) +  i * (this.position.get(3) - this.position.get(1) + 7) / (this.numInputPorts + 1) - 3.5));
             for (int i = 1; i <= this.numOutputPorts; i++)
-                this.outPorts.add(new Point2D(this.position.get(0), this.position.get(1) +  i * (this.position.get(3) - this.position.get(1) - 10) / this.numInputPorts + 5));
+                this.outPorts.add(new Point2D(this.position.get(0), this.position.get(1) +  i * (this.position.get(3) - this.position.get(1) + 7) / (this.numOutputPorts + 1) - 3.5));
         } else {
-            for (int i = 0; i < this.numInputPorts; i++)
-                this.inPorts.add(new Point2D(this.position.get(0), this.position.get(1) +  i * (this.position.get(3) - this.position.get(1) - 10) / this.numInputPorts + 5));
-            for (int i = 0; i < this.numOutputPorts; i++)
-                this.outPorts.add(new Point2D(this.position.get(2), this.position.get(1) +  i * (this.position.get(3) - this.position.get(1) - 10) / this.numInputPorts + 5));
+            for (int i = 1; i <= this.numInputPorts; i++)
+                this.inPorts.add(new Point2D(this.position.get(0), this.position.get(1) +  i * (this.position.get(3) - this.position.get(1) + 7) / (this.numInputPorts + 1) - 3.5 ));
+            for (int i = 1; i <= this.numOutputPorts; i++)
+                this.outPorts.add(new Point2D(this.position.get(2), this.position.get(1) +  i * (this.position.get(3) - this.position.get(1) + 7) / (this.numOutputPorts + 1) - 3.5));
         } 
     }
 

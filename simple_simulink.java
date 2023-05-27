@@ -21,6 +21,7 @@ import org.xml.sax.InputSource;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.geometry.Point2D;
+import javafx.scene.Group;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -28,6 +29,7 @@ import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Polygon;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
@@ -67,11 +69,11 @@ public class simple_simulink  extends Application {
                     }
             }
 
-            NodeList lineList = doc.getElementsByTagName("Line");
+            NodeList ListOfLineList = doc.getElementsByTagName("Line");
             List<LineList> lines = new ArrayList<LineList>();
             
-            for (int i = 0; i < lineList.getLength(); i++) {
-                Node lineListNode = lineList.item(i);
+            for (int i = 0; i < ListOfLineList.getLength(); i++) {
+                Node lineListNode = ListOfLineList.item(i);
                 if (lineListNode.getNodeType() == Node.ELEMENT_NODE) {
                     Element lineListElement = (Element) lineListNode;
                     lines.add(new LineList(lineListElement));
@@ -80,29 +82,52 @@ public class simple_simulink  extends Application {
                 }
             }
             Pane root = new Pane();
-            for (int i = 0; i < blocks.size(); i++) {
-                int x = blocks.get(i).getPosition().get(0);
-                int y = blocks.get(i).getPosition().get(1);
-                int width = blocks.get(i).getPosition().get(2) - x;
-                int height = blocks.get(i).getPosition().get(3) - y;
+            for (Block block : blocks) {
+                int x = block.getPosition().get(0);
+                int y = block.getPosition().get(1);
+                int width = block.getPosition().get(2) - x;
+                int height = block.getPosition().get(3) - y;
 
                 Rectangle rectangle = new Rectangle(x, y, width, height);
-                rectangle.setFill(Color.LIGHTBLUE);
+                rectangle.setFill(Color.TRANSPARENT);
                 rectangle.setStroke(Color.BLACK);
                 rectangle.setStrokeWidth(2);
 
                 root.getChildren().add(rectangle);
 
-                Text textNode = new Text(blocks.get(i).getName());
-                textNode.setFont(new Font("Arial", 8));
-                textNode.setFill(Color.BLACK);
-                textNode.setX((x + 10));
-                textNode.setY((y + height/2 + textNode.getLayoutBounds().getHeight()/2));
+                Text textNode = new Text(block.getName());
+                textNode.setFont(new Font("Arial", 10));
+                textNode.setFill(Color.BLUE);
+                textNode.setX((x));
+                textNode.setY((y + 1.2 * height + textNode.getLayoutBounds().getHeight() / 2));
                 root.getChildren().add(textNode);
+                for (int j = 0; j < block.getInPorts().size(); j++){
+                    double x_axis = block.getInPorts().get(j).getX();
+                    double y_axis = block.getInPorts().get(j).getY();
+                                        
+                    Group g = new Group();
+
+                    Polygon polygon = new Polygon();
+                    if (!block.getBlockMirror())
+                        polygon.getPoints().addAll(new Double[]{
+                            x_axis, y_axis,
+                            x_axis - 5, y_axis - 5,
+                            x_axis - 5, y_axis + 5});
+                    else
+                        polygon.getPoints().addAll(new Double[]{
+                            x_axis, y_axis,
+                            x_axis + 5, y_axis - 5,
+                            x_axis + 5, y_axis + 5});
+                    
+                    g.getChildren().add(polygon);
+                    root.getChildren().add(g);
+
+                }
             }
             
-            for (int i = 0; i < lines.size(); i++) {
-                ArrayList<Pair<Point2D, Point2D>> currentList = lines.get(i).getLineList();
+            
+            for (LineList lineList : lines) {
+                ArrayList<Pair<Point2D, Point2D>> currentList = lineList.getLineList();
                 for (int j = 0; j < currentList.size(); j++){
                     int x1 = (int) currentList.get(j).getKey().getX();
                     int y1 = (int) currentList.get(j).getKey().getY();
@@ -112,20 +137,6 @@ public class simple_simulink  extends Application {
                     Line line = new Line(x1, y1, x2, y2);
                 
                     root.getChildren().add(line);
-
-                    Rectangle rectangle1 = new Rectangle(x1, y1, 5, 5);
-                    rectangle1.setFill(Color.LIGHTBLUE);
-                    rectangle1.setStroke(Color.BLACK);
-                    rectangle1.setStrokeWidth(2);
-
-                    root.getChildren().add(rectangle1);
-                    
-                    Rectangle rectangle2 = new Rectangle(x2, y2, 5, 5);
-                    rectangle2.setFill(Color.LIGHTBLUE);
-                    rectangle2.setStroke(Color.BLACK);
-                    rectangle2.setStrokeWidth(2);
-
-                    root.getChildren().add(rectangle2);
 
                 }
             }
