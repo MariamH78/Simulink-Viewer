@@ -34,16 +34,20 @@ public class LineList {
                     Point2D pt1;
                     Point2D pt2;
                     branchPts.add(0, starting_pt);
-                    for (int i = 1; i < branchPts.size(); i++){
-                        pt1 = new Point2D(starting_pt.getX() + branchPts.get(i - 1).getX(), starting_pt.getY() + branchPts.get(i - 1).getY());
-                        pt2 = new Point2D(starting_pt.getX() + branchPts.get(i).getX(), starting_pt.getY() + branchPts.get(i).getY());
-                        
+                    for (int i = 1; i < branchPts.size() - 1; i++){
+                        pt1 = branchPts.get(i-1);
+                        pt2 = branchPts.get(i);
+                        System.out.println(new Pair(pt1, pt2));
                         lineList.add(new Pair(pt1, pt2));
                     }
+                    pt1 = branchPts.get(branchPts.size() - 2);
+                    pt2 = branchPts.get(branchPts.size() - 1);
+                    lineList.add(new Pair(pt1, pt2));
                 }
-                
-            }
+               
+            } System.out.println();
         }
+         System.out.println();
         return lineList;
     }
     
@@ -88,17 +92,25 @@ public class LineList {
                         
                     case "Points":
                         String[] pointStrings = propertyValue.substring(1, propertyValue.length() - 1).split(";|$");
+                        
+                            ArrayList<Double> pointInts = new ArrayList<>();
                         for (String point : pointStrings){
                             String[] pointString = point.split(",");
-                            ArrayList<Integer> pointInts = new ArrayList<>();
                             for (String i : pointString) {
-                               int coord = Integer.parseInt(i.trim());
+                               double coord = Integer.parseInt(i.trim());
                                pointInts.add(coord);
                             }
-                            for (int i = 1; i < pointInts.size(); i+=2){
-                                pointList.add(new Point2D(pointInts.get(i) + starting_pt.getX(), pointInts.get(i - 1) + starting_pt.getY()));
-                            }
                         }
+                            for (int i = 1; i < 3; i+=2){
+                                pointInts.set(i, starting_pt.getX() + pointInts.get(i));
+                                pointInts.set(i - 1, starting_pt.getY() + pointInts.get(i - 1));
+                                pointList.add(new Point2D(pointInts.get(i), pointInts.get(i - 1)));
+                            }
+                            for (int i = 3; i < pointInts.size(); i+=2){
+                                pointInts.set(i, pointInts.get(i) + pointInts.get(i - 2));
+                                pointInts.set(i - 1, pointInts.get(i - 1) + pointInts.get(i - 3));
+                                pointList.add(new Point2D(pointInts.get(i), pointInts.get(i - 1)));
+                            }
                         break;
                 }    
             }

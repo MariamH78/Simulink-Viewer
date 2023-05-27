@@ -30,7 +30,8 @@ public class Block {
         this.sid = Integer.parseInt(BlockElement.getAttribute("SID"));
         this.numInputPorts = 1;
         this.numOutputPorts = 1;
-
+        this.blockMirror = false;
+        
         NodeList SubBlockList = BlockElement.getElementsByTagName("P");
         for (int j = 0; j < SubBlockList.getLength(); j++) {
             Node SubBlockNode = SubBlockList.item(j);
@@ -70,7 +71,8 @@ public class Block {
                         this.numInputPorts = Integer.parseInt(SubBlockValue.trim());
                         break;
                     case "BlockMirror":
-                        this.blockMirror = Boolean.parseBoolean(SubBlockValue.trim());
+                        if (SubBlockValue.trim().equals("on"))
+                            this.blockMirror = true;
                         break;
                 }
             }
@@ -80,16 +82,14 @@ public class Block {
         this.outPorts = new ArrayList<>();
         if (this.blockMirror){
             for (int i = 1; i <= this.numInputPorts; i++)
-                this.inPorts.add(new Point2D(this.position.get(2), this.position.get(1) +  i * (this.position.get(3) - this.position.get(1)) / this.numInputPorts));
+                this.inPorts.add(new Point2D(this.position.get(2), this.position.get(1) +  i * (this.position.get(3) - this.position.get(1) - 10) / this.numInputPorts + 5));
             for (int i = 1; i <= this.numOutputPorts; i++)
-                this.outPorts.add(new Point2D(this.position.get(0), this.position.get(1) +  i * (this.position.get(3) - this.position.get(1)) / this.numInputPorts));
+                this.outPorts.add(new Point2D(this.position.get(0), this.position.get(1) +  i * (this.position.get(3) - this.position.get(1) - 10) / this.numInputPorts + 5));
         } else {
-            System.out.println(this.position);
             for (int i = 0; i < this.numInputPorts; i++)
-                this.inPorts.add(new Point2D(this.position.get(0), this.position.get(1) +  i * (this.position.get(3) - this.position.get(1)) / this.numInputPorts));
-            for (int i = 0; i < this.numOutputPorts; i++){
-                    this.inPorts.add(new Point2D(this.position.get(2), this.position.get(1) +  i * (this.position.get(3) - this.position.get(1)) / this.numInputPorts));
-            System.out.println(this.inPorts);}
+                this.inPorts.add(new Point2D(this.position.get(0), this.position.get(1) +  i * (this.position.get(3) - this.position.get(1) - 10) / this.numInputPorts + 5));
+            for (int i = 0; i < this.numOutputPorts; i++)
+                this.outPorts.add(new Point2D(this.position.get(2), this.position.get(1) +  i * (this.position.get(3) - this.position.get(1) - 10) / this.numInputPorts + 5));
         } 
     }
 

@@ -26,6 +26,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.stage.Stage;
 import javafx.util.Pair;
@@ -68,30 +69,35 @@ public class simple_simulink  extends Application {
 
             NodeList lineList = doc.getElementsByTagName("Line");
             List<LineList> lines = new ArrayList<LineList>();
-
+            
             for (int i = 0; i < lineList.getLength(); i++) {
                 Node lineListNode = lineList.item(i);
                 if (lineListNode.getNodeType() == Node.ELEMENT_NODE) {
                     Element lineListElement = (Element) lineListNode;
                     lines.add(new LineList(lineListElement));
+                    
+
                 }
             }
-            
             Pane root = new Pane();
             for (int i = 0; i < blocks.size(); i++) {
-                blocks.get(i).print();
                 int x = blocks.get(i).getPosition().get(0);
                 int y = blocks.get(i).getPosition().get(1);
-                int width = blocks.get(i).getPosition().get(3) - x;
-                int higth = blocks.get(i).getPosition().get(4) - y;
-                Rectangle rectangle = new Rectangle(x, y, width, higth);
-                
+                int width = blocks.get(i).getPosition().get(2) - x;
+                int height = blocks.get(i).getPosition().get(3) - y;
+
+                Rectangle rectangle = new Rectangle(x, y, width, height);
+                rectangle.setFill(Color.LIGHTBLUE);
+                rectangle.setStroke(Color.BLACK);
+                rectangle.setStrokeWidth(2);
+
                 root.getChildren().add(rectangle);
 
                 Text textNode = new Text(blocks.get(i).getName());
-                textNode.setFont(new Font("Arial", 12));
-                textNode.setX(x + width/2);
-                textNode.setY(y + higth/2);
+                textNode.setFont(new Font("Arial", 8));
+                textNode.setFill(Color.BLACK);
+                textNode.setX((x + 10));
+                textNode.setY((y + height/2 + textNode.getLayoutBounds().getHeight()/2));
                 root.getChildren().add(textNode);
             }
             
@@ -106,6 +112,20 @@ public class simple_simulink  extends Application {
                     Line line = new Line(x1, y1, x2, y2);
                 
                     root.getChildren().add(line);
+
+                    Rectangle rectangle1 = new Rectangle(x1, y1, 5, 5);
+                    rectangle1.setFill(Color.LIGHTBLUE);
+                    rectangle1.setStroke(Color.BLACK);
+                    rectangle1.setStrokeWidth(2);
+
+                    root.getChildren().add(rectangle1);
+                    
+                    Rectangle rectangle2 = new Rectangle(x2, y2, 5, 5);
+                    rectangle2.setFill(Color.LIGHTBLUE);
+                    rectangle2.setStroke(Color.BLACK);
+                    rectangle2.setStrokeWidth(2);
+
+                    root.getChildren().add(rectangle2);
 
                 }
             }
