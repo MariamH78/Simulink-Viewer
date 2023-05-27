@@ -14,6 +14,7 @@ public class LineList {
     private Point2D ending_pt;
     
     public LineList(Element lineElement){
+        this.lineList = new ArrayList<>();
         ArrayList<Point2D> pointList = getLines(lineElement);
         for (int i = 1; i < pointList.size(); i++)
             this.lineList.add(new Pair(pointList.get(i - 1), pointList.get(i)));
@@ -40,6 +41,7 @@ public class LineList {
                         lineList.add(new Pair(pt1, pt2));
                     }
                 }
+                
             }
         }
         return lineList;
@@ -50,6 +52,7 @@ public class LineList {
     
         NodeList propertyList = lineElement.getElementsByTagName("P");
         for (int j = 0; j < propertyList.getLength(); j++) {
+                                    
             Node SubBlockNode = propertyList.item(j);
             if (SubBlockNode.getNodeType() == Node.ELEMENT_NODE) {
                 Element SubBlockElement = (Element) SubBlockNode;
@@ -57,17 +60,18 @@ public class LineList {
                 String propertyName = SubBlockElement.getAttribute("Name");
                 String propertyValue = SubBlockElement.getTextContent();
                 int port_no;
-                
+
                 switch(propertyName){
                     case "Src":
                         String srcStringParts[] = propertyValue.split("#");
-                        int source_id = Integer.parseInt(srcStringParts[0]); 
+                        int source_id = Integer.parseInt(srcStringParts[0]);
                         srcStringParts = srcStringParts[1].split(":");
                         port_no = Integer.parseInt(srcStringParts[1]);
                         if (srcStringParts[0].equals("out"))
-                            starting_pt = Block.getBlockList().get(source_id).getOutPorts().get(port_no);
+                            starting_pt = Block.getBlockList().get(source_id).getOutPorts().get(port_no - 1);
                         else
-                            starting_pt = Block.getBlockList().get(source_id).getInPorts().get(port_no);
+                            starting_pt = Block.getBlockList().get(source_id).getInPorts().get(port_no - 1);
+
                         break;
                         
                     case "Dst":
@@ -76,13 +80,14 @@ public class LineList {
                         dstStringParts = dstStringParts[1].split(":");
                         port_no = Integer.parseInt(dstStringParts[1]);
                         if (dstStringParts[0].equals("out"))
-                            ending_pt = Block.getBlockList().get(destination_id).getOutPorts().get(port_no);
+                            ending_pt = Block.getBlockList().get(destination_id).getOutPorts().get(port_no - 1);
                         else
-                            ending_pt = Block.getBlockList().get(destination_id).getInPorts().get(port_no);
+                            ending_pt = Block.getBlockList().get(destination_id).getInPorts().get(port_no - 1);
+
                         break;
                         
                     case "Points":
-                        String[] pointStrings = propertyValue.substring(1, propertyValue.length() - 1).split(";");
+                        String[] pointStrings = propertyValue.substring(1, propertyValue.length() - 1).split(";|$");
                         for (String point : pointStrings){
                             String[] pointString = point.split(",");
                             ArrayList<Integer> pointInts = new ArrayList<>();
@@ -90,8 +95,8 @@ public class LineList {
                                int coord = Integer.parseInt(i.trim());
                                pointInts.add(coord);
                             }
-                            for (int i = 0; i < pointInts.size(); i+=2){
-                                pointList.add(new Point2D(pointInts.get(i), pointInts.get(i - 1)));
+                            for (int i = 1; i < pointInts.size(); i+=2){
+                                pointList.add(new Point2D(pointInts.get(i) + starting_pt.getX(), pointInts.get(i - 1) + starting_pt.getY()));
                             }
                         }
                         break;

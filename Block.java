@@ -79,10 +79,10 @@ public class Block {
         this.inPorts = new ArrayList<>();
         this.outPorts = new ArrayList<>();
         if (this.blockMirror){
-            for (int i = 0; i < this.numInputPorts; i++)
-                this.inPorts.add(new Point2D((double)(i * (this.position.get(3) - this.position.get(1) - 5) / this.numInputPorts + 5), (double)(this.position.get(3))));
-            for (int i = 0; i < this.numOutputPorts; i++)
-                this.outPorts.add(new Point2D((double)(i * (this.position.get(3) - this.position.get(1) - 5) / this.numInputPorts + 5), (double)(this.position.get(0))));    
+            for (int i = 1; i <= this.numInputPorts; i++)
+                this.inPorts.add(new Point2D((double)(i * (this.position.get(3) - this.position.get(1) - 5) / (this.numInputPorts + 1) + 5), (double)(this.position.get(3))));
+            for (int i = 1; i <= this.numOutputPorts; i++)
+                this.outPorts.add(new Point2D((double)(i * (this.position.get(3) - this.position.get(1) - 5) / (this.numInputPorts + 1) + 5), (double)(this.position.get(0))));    
         } 
         else {
             for (int i = 0; i < this.numInputPorts; i++)
