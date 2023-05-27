@@ -30,9 +30,15 @@ public class LineList {
             if (branchNode.getNodeType() == Node.ELEMENT_NODE) {
                 ArrayList <Point2D> branchPts = getLines((Element) branchNode);
                 if (branchPts != null){
+                    Point2D pt1;
+                    Point2D pt2;
                     branchPts.add(0, starting_pt);
-                    for (int i = 1; i < branchPts.size(); i++)
-                        lineList.add(new Pair(branchPts.get(i - 1), branchPts.get(i)));
+                    for (int i = 1; i < branchPts.size(); i++){
+                        pt1 = new Point2D(starting_pt.getX() + branchPts.get(i - 1).getX(), starting_pt.getY() + branchPts.get(i - 1).getY());
+                        pt2 = new Point2D(starting_pt.getX() + branchPts.get(i).getX(), starting_pt.getY() + branchPts.get(i).getY());
+                        
+                        lineList.add(new Pair(pt1, pt2));
+                    }
                 }
             }
         }
